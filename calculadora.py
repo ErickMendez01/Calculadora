@@ -33,6 +33,8 @@ class Calculadora:
             self.operador(valor)
         elif valor == "=":
             self.operacion()
+        elif valor == "!n":
+            self.mostrar_factorial()
 
     def operador(self, op):
         self.signo = op
@@ -42,19 +44,45 @@ class Calculadora:
         except ValueError:
             messagebox.showerror("Error", "Ingrese un número válido")
 
+    def suma(self, actual):
+        return self.aux + actual
+    
+    def resta(self, actual):
+        return self.aux - actual
+    
+    def multiplicacion(self, actual):
+        return self.aux * actual 
+       
+    def division(self, actual): 
+        return self.aux / actual
+    
+    def factorial(self, valor):
+        if valor == 0 or valor == 1:
+            return 1
+        resultado = 1
+        for i in range(2, valor + 1):
+            resultado *= i
+        return resultado
+        
+    def mostrar_factorial(self):
+            actual = int(float(self.txtDisplay.get()))  
+            resultado = self.factorial(actual)
+            self.txtDisplay.delete(0, END)
+            self.txtDisplay.insert(0, str(resultado))
+            
     def operacion(self):
         try:
             actual = float(self.txtDisplay.get())
         
             if self.signo == "+":
-                resultado = self.aux + actual
+                resultado = self.suma(actual)
             elif self.signo == "-":
-                 resultado = self.aux - actual
+                 resultado = self.resta(actual)
             elif self.signo == "*":
-                 resultado = self.aux * actual
+                 resultado = self.multiplicacion(actual)
             elif self.signo == "/":
                 try:
-                    resultado = self.aux / actual  
+                     resultado = self.division(actual)
                 except ZeroDivisionError:
                     messagebox.showerror("Error de sistema","División entre cero")
                     return
@@ -62,6 +90,6 @@ class Calculadora:
             self.txtDisplay.insert(0, str(resultado))
         except ValueError:
             messagebox.showerror("Error de sistema", "Operación no válida")
+
 if __name__=="__main__":
     Calculadora()
-   
