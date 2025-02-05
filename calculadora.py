@@ -6,18 +6,24 @@ class Calculadora:
         self.root = tk.Tk()
         self.root.title("Calculadora")
         self.root.geometry("400x500")
+
         self.txtDisplay = tk.Entry(self.root, font=("Arial", 18), width=18, bd=5, justify="right")
         self.txtDisplay.grid(row=0, column=0, columnspan=4, pady=10)
+        self.txtDisplay.bind("<KeyRelease>", self.actualizar_binario)
+        
+        self.lblBinario = tk.Label(self.root, text="Bin 0", font=("Arial", 12), anchor="e")
+        self.lblBinario.grid(row=1, column=0, columnspan=4, pady=5, sticky="w")
+
         self.aux = 0
         self.signo = ""
 
         botones = [
-            ('A',0,1),('log', 1, 1), ('x^x', 2, 1), ('CE', 3, 1), ('<-', 4, 1),
-            ('B',0,2),('^', 1, 2),   ('!n', 2, 2),  ('%', 3, 2),  ('/', 4, 2),
-            ('C',0,3),('7', 1, 3),   ('8', 2, 3),   ('9', 3, 3),  ('*', 4, 3),
-            ('D',0,4),('4', 1, 4),   ('5', 2, 4),   ('6', 3, 4),  ('-', 4, 4),
-            ('E',0,5),('1', 1, 5),   ('2', 2, 5),   ('3', 3, 5),  ('+', 4, 5),
-            ('F',0,6),('AB', 1, 6),  ('0', 2, 6),   ('.', 3, 6),  ('=', 4, 6)
+            ('A',0,2),('log', 1, 2), ('x^x', 2, 2), ('CE', 3, 2), ('<-', 4, 2),
+            ('B',0,3),('^', 1, 3),   ('!n', 2, 3),  ('%', 3, 3),  ('/', 4, 3),
+            ('C',0,4),('7', 1, 4),   ('8', 2, 4),   ('9', 3, 4),  ('*', 4, 4),
+            ('D',0,5),('4', 1, 5),   ('5', 2, 5),   ('6', 3, 5),  ('-', 4, 5),
+            ('E',0,6),('1', 1, 6),   ('2', 2, 6),   ('3', 3, 6),  ('+', 4, 6),
+            ('F',0,7),('AB', 1, 7),  ('0', 2, 7),   ('.', 3, 7),  ('=', 4, 7)
         ]
 
         for (text, col, row) in botones:
@@ -29,12 +35,30 @@ class Calculadora:
     def boton_click(self, valor):
         if valor in "0123456789.":
             self.txtDisplay.insert(END, valor)
+            self.actualizar_binario()
         elif valor in "+-*/":
             self.operador(valor)
         elif valor == "=":
             self.operacion()
         elif valor == "!n":
             self.mostrar_factorial()
+
+    def decimal_a_binario(self, decimal):
+        if decimal <= 0:
+            return "0"
+        binario = ""
+        while decimal > 0:
+            residuo = int(decimal % 2)
+            decimal = int(decimal / 2)
+            binario = str(residuo) + binario
+        return binario
+
+    def actualizar_binario(self, event=None):
+        try:
+            valor = int(float(self.txtDisplay.get()))
+            self.lblBinario.config(text=f"Bin {self.decimal_a_binario(valor)}")
+        except ValueError:
+            self.lblBinario.config(text="Bin 0")
 
     def operador(self, op):
         self.signo = op
@@ -65,11 +89,12 @@ class Calculadora:
         return resultado
         
     def mostrar_factorial(self):
-            actual = int(float(self.txtDisplay.get()))  
-            resultado = self.factorial(actual)
-            self.txtDisplay.delete(0, END)
-            self.txtDisplay.insert(0, str(resultado))
-            
+        actual = int(float(self.txtDisplay.get()))  
+        resultado = self.factorial(actual)
+        self.txtDisplay.delete(0, END)
+        self.txtDisplay.insert(0, str(resultado))
+        self.actualizar_binario()
+    
     def operacion(self):
         try:
             actual = float(self.txtDisplay.get())
@@ -88,6 +113,7 @@ class Calculadora:
                     return
             self.txtDisplay.delete(0, END)
             self.txtDisplay.insert(0, str(resultado))
+            self.actualizar_binario()
         except ValueError:
             messagebox.showerror("Error de sistema", "Operación no válida")
 
