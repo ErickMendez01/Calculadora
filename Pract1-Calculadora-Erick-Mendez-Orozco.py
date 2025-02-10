@@ -1,12 +1,11 @@
 import tkinter as tk
 from tkinter import END, messagebox
-import math
 
 class Calculadora:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Calculadora")
-        self.root.geometry("310x450")
+        self.root.geometry("310x420")
 
         self.txtDisplay = tk.Entry(self.root, font=("Arial", 18), width=18, bd=5, justify="right")
         self.txtDisplay.grid(row=0, column=0, columnspan=4, pady=10)
@@ -45,15 +44,15 @@ class Calculadora:
             self.operacion()
         elif valor == "n!":
             self.mostrar_factorial()
-        elif valor == "xʸ":
-            self.exponente()
+        elif valor == "xʸ":  # Aquí se usa el operador ^ para el exponente
+            self.operador("^")
         elif valor == "√":
             self.mostrar_raiz()
         elif valor == "CE":
             self.limpiar_pantalla()
         elif valor == "<-":
             self.borrar()
-
+    
     def punto(self):
         actual = self.txtDisplay.get()
         if not actual or actual[-1] in "+-*/%":
@@ -62,6 +61,16 @@ class Calculadora:
             partes = actual.split("+")[-1].split("-")[-1].split("*")[-1].split("/")[-1].split("%")[-1]
             if "." not in partes:
                 self.txtDisplay.insert(END, ".")  
+
+    def decimal_a_binario(self, decimal):
+        if decimal <= 0:
+            return "0"
+        binario = ""
+        while decimal > 0:
+            residuo = int(decimal % 2)
+            decimal = int(decimal / 2)
+            binario = str(residuo) + binario
+        return binario
 
     def actualizar_binario(self, event=None):
         try:
@@ -78,66 +87,89 @@ class Calculadora:
         except ValueError:
             messagebox.showerror("Error", "Ingrese un número válido")
 
+    def suma(self, actual):
+        return self.aux + actual
+    
+    def resta(self, actual):
+        return self.aux - actual
+    
+    def multiplicacion(self, actual):
+        return self.aux * actual 
+       
+    def division(self, actual): 
+        return self.aux / actual
+    
+    def factorial(self, valor):
+        if valor == 0 or valor == 1:
+            return 1
+        resultado = 1
+        for i in range(2, valor + 1):
+            resultado *= i
+        return resultado
+    
+    def porcentaje(self, actual):
+        return (self.aux * actual) / 100  
+    
+    def exponente(self, actual):
+        return self.aux ** actual
+    
+    def raiz_cuadrada(self, valor):
+        if valor < 0:
+            return None
+        x = valor
+        y = 1.0
+        while abs(x - y) > 0.000001:
+            x = (x + y) / 2
+            y = valor / x
+        return x
+        
+    def mostrar_factorial(self):
+        actual = int(float(self.txtDisplay.get()))  
+        resultado = self.factorial(actual)
+        self.txtDisplay.delete(0, END)
+        self.txtDisplay.insert(0, str(resultado))
+        self.actualizar_binario()
+
+    def mostrar_raiz(self):
+        try:
+            actual = float(self.txtDisplay.get())
+            resultado = self.raiz_cuadrada(actual)
+            if resultado is None:
+                messagebox.showerror("Error", "Número negativo en raíz")
+                return
+            self.txtDisplay.delete(0, END)
+            self.txtDisplay.insert(0, str(resultado))
+            self.actualizar_binario()
+        except ValueError:
+            messagebox.showerror("Error", "Ingrese un número válido")
+    
     def operacion(self):
         try:
             actual = float(self.txtDisplay.get())
         
             if self.signo == "+":
-                resultado = self.aux + actual
+                resultado = self.suma(actual)
             elif self.signo == "-":
-                resultado = self.aux - actual
+                resultado = self.resta(actual)
             elif self.signo == "*":
-                resultado = self.aux * actual
+                resultado = self.multiplicacion(actual)
             elif self.signo == "/":
-                if actual == 0:
-                    messagebox.showerror("Error de sistema", "División entre cero")
+                try:
+                     resultado = self.division(actual)
+                except ZeroDivisionError:
+                    messagebox.showerror("Error de sistema","División entre cero")
                     return
-                resultado = self.aux / actual
             elif self.signo == "%":
-                resultado = (self.aux * actual) / 100
+                resultado = self.porcentaje(actual)
             elif self.signo == "^":
-                resultado = self.aux ** actual
-
+                resultado = self.exponente(actual)
+                
             self.txtDisplay.delete(0, END)
             self.txtDisplay.insert(0, str(resultado))
             self.actualizar_binario()
         except ValueError:
             messagebox.showerror("Error de sistema", "Operación no válida")
             
-    def exponente(self):
-        try:
-            self.aux = float(self.txtDisplay.get())
-            self.signo = "^"
-            self.txtDisplay.delete(0, END)
-        except ValueError:
-            messagebox.showerror("Error de sistema", "Ingrese un número válido")
-
-    def mostrar_factorial(self):
-        try:
-            actual = int(float(self.txtDisplay.get()))
-            resultado = math.factorial(actual) if actual >= 0 else None
-            if resultado is None:
-                messagebox.showerror("Error", "Factorial no definido para negativos")
-                return
-            self.txtDisplay.delete(0, END)
-            self.txtDisplay.insert(0, str(resultado))
-            self.actualizar_binario()
-        except ValueError:
-            messagebox.showerror("Error", "Ingrese un número válido")
-
-    def mostrar_raiz(self):
-        try:
-            actual = float(self.txtDisplay.get())
-            resultado = math.sqrt(actual) if actual >= 0 else None
-            if resultado is None:
-                messagebox.showerror("Error", "No se puede calcular la raíz de un número negativo")
-                return
-            self.txtDisplay.delete(0, END)
-            self.txtDisplay.insert(0, str(resultado))
-            self.actualizar_binario()
-        except ValueError:
-            messagebox.showerror("Error", "Ingrese un número válido")
-
     def limpiar_pantalla(self):
         self.txtDisplay.delete(0, END)
         self.lblBinario.config(text="Bin 0")
@@ -148,8 +180,5 @@ class Calculadora:
             self.txtDisplay.delete(len(actual) - 1, END)
             self.actualizar_binario()
 
-    def decimal_a_binario(self, decimal):
-        return bin(decimal)[2:] if decimal > 0 else "0"
-
-if __name__ == "__main__":
+if __name__=="__main__":
     Calculadora()
