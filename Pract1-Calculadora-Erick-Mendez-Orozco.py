@@ -44,7 +44,7 @@ class Calculadora:
             self.operacion()
         elif valor == "n!":
             self.mostrar_factorial()
-        elif valor == "xʸ":  # Aquí se usa el operador ^ para el exponente
+        elif valor == "xʸ": 
             self.operador("^")
         elif valor == "√":
             self.mostrar_raiz()
@@ -121,14 +121,18 @@ class Calculadora:
         while abs(x - y) > 0.000001:
             x = (x + y) / 2
             y = valor / x
-        return x
+        return round(x,4)
         
     def mostrar_factorial(self):
-        actual = int(float(self.txtDisplay.get()))  
-        resultado = self.factorial(actual)
-        self.txtDisplay.delete(0, END)
-        self.txtDisplay.insert(0, str(resultado))
-        self.actualizar_binario()
+        try:
+            actual = int(float(self.txtDisplay.get()))  
+            resultado = self.factorial(actual)
+            self.txtDisplay.delete(0, END)
+            self.txtDisplay.insert(0, str(resultado))
+            self.actualizar_binario()
+        except ValueError as e:
+                messagebox.showerror("Error", "Ingrese un número válido")
+
 
     def mostrar_raiz(self):
         try:
